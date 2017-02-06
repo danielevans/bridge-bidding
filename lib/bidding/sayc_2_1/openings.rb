@@ -32,10 +32,7 @@ SAYC_2_1.define do
   convention :major_opening do
     opening true
     length suit: Bridge::Strain.majors, minimum: 5
-
-    seat 1..4 do
-      length_points minimum: 13
-    end
+    length_points minimum: 13
 
     seat 3..4 do
       length_points minimum: 11
@@ -56,16 +53,14 @@ SAYC_2_1.define do
   convention :minor_opening do
     opening true
     length suit: Bridge::Strain.minors, minimum: 3
-
-    seat 1..4 do
-      length_points minimum: 13
-    end
+    length_points minimum: 13
 
     seat 3..4 do
       length_points minimum: 11
     end
 
     seat 4 do
+      length_points minimum: 0
       only_if do |hand, _history| # rule of 15
         hand.length(Strain::Spades) + hand.high_card_points >= 15
       end
@@ -84,18 +79,20 @@ SAYC_2_1.define do
     end
   end
 
-  convention :preempt_opening do
+  convention :preempt_opening do # TODO: "good" suits
     opening true
     length_points 7..12
 
     only_if do |hand, _history|
-      (Bridge::Strain::Suits - Bridge::Strain::Club).any? do |strain|
-        hand.length(strain) >= 6 && hand.strong?(strain)
-      end || (hand.length(Bridge::Strain::Club) >= 7 && hand.strong?(Bridge::Strain::Club))
+      (Bridge::Strain.suits).any? do |suit|
+        hand.length(suit) >= 6 && hand.strong?(suit) && (suit != Bridge::Strain::Club || hand.length(suit) >= 7)
+      end
     end
 
     bid do |hand, _history|
-      strain = hand.longest_suit # TODO: could be 6/6 or 7/6 and only one strong
+      strain = Bridge::Strain.suits.select do |suit|
+        hand.length(suit) >= 6 && (suit != Bridge::Strain::Club || hand.length(suit) >= 7)
+      end.sort_by { |suit| hand.length(suit) }.first
       Bridge::Bid.new (hand.length(strain) - 4), strain
     end
   end

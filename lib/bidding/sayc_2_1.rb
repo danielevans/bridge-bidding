@@ -6,8 +6,6 @@ class SAYC_2_1 < Bidding::Base
 
   self.openings = %i{three_notrump_opening two_notrump_opening one_notrump_opening strong_2_club major_opening minor_opening preempt_opening}
 
-  def self.bid hand, history
-  end
 end
 
 
