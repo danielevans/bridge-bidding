@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/danielevans/bridge-rb.git
-  revision: a08367d7e38c2f4a087c23c56c3e62742b5593fc
+  revision: 4b515578ffde7364f8e4b68be96f507ba557ae78
   specs:
     bridge (0.1.0)
 

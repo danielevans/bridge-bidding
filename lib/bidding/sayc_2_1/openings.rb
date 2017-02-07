@@ -32,9 +32,8 @@ SAYC_2_1.define do
   convention :major_opening do
     opening true
     length suit: Bridge::Strain.majors, minimum: 5
-    length_points minimum: 13
 
-    seat 3..4 do
+    seat 3 do
       length_points minimum: 11
     end
 
@@ -43,6 +42,10 @@ SAYC_2_1.define do
         hand.length(Bridge::Strain::Spades) + hand.high_card_points >= 15
       end
     end
+
+    # requirements which are not shared with the other seats need to come after the other seats are defined
+    length_points minimum: 13
+    seat 1..2
 
     bid do |hand, _history|
       strain = hand.length(Bridge::Strain::Heart) > hand.length(Bridge::Strain::Spade) ? Bridge::Strain::Heart : Bridge::Strain::Spade
@@ -53,18 +56,20 @@ SAYC_2_1.define do
   convention :minor_opening do
     opening true
     length suit: Bridge::Strain.minors, minimum: 3
-    length_points minimum: 13
 
-    seat 3..4 do
+    seat 3 do
       length_points minimum: 11
     end
 
     seat 4 do
-      length_points minimum: 0
       only_if do |hand, _history| # rule of 15
-        hand.length(Strain::Spades) + hand.high_card_points >= 15
+        hand.length(Bridge::Strain::Spades) + hand.high_card_points >= 15
       end
     end
+
+    # requirements which are not shared with the other seats need to come after the other seats are defined
+    length_points minimum: 13
+    seat 1..2
 
     bid do |hand, _history|
       strain = if hand.length(Bridge::Strain::Diamond) == hand.length(Bridge::Strain::Club) && hand.length(Bridge::Strain::Diamond) == 3
@@ -89,10 +94,22 @@ SAYC_2_1.define do
       end
     end
 
-    bid do |hand, _history|
-      strain = Bridge::Strain.suits.select do |suit|
-        hand.length(suit) >= 6 && (suit != Bridge::Strain::Club || hand.length(suit) >= 7)
-      end.sort_by { |suit| hand.length(suit) }.first
+    seat 4 do
+      only_if do |hand, _history| # rule of 15
+        (hand.length(Bridge::Strain::Spades) + hand.high_card_points >= 15) && hand.length(Bridge::Strain::Spades) >= 6
+      end
+    end
+
+    seat 1..3
+
+    bid do |hand, history|
+      strain = if history.length == 3 # 4th seat can only preempt in spade
+                 Bridge::Strain::Spade
+               else
+                 Bridge::Strain.suits.select do |suit|
+                   hand.length(suit) >= 6 && (suit != Bridge::Strain::Club || hand.length(suit) >= 7)
+                 end.sort_by { |suit| hand.length(suit) }.first
+               end
       Bridge::Bid.new (hand.length(strain) - 4), strain
     end
   end

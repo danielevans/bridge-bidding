@@ -2,8 +2,15 @@ require 'spec_helper'
 require 'bidding/sayc_2_1'
 
 RSpec.describe SAYC_2_1 do
-  let(:subject) { described_class.new }
-  let(:cards)   { Bridge::Card.shuffle.sample }
+  let(:subject)  { described_class.new }
+  let(:card_str) { "AKQJ.AKQ.AKQ.AQK"  }
+
+  let(:cards) do
+    [Bridge::Strain::Spade,Bridge::Strain::Heart,Bridge::Strain::Diamond,Bridge::Strain::Club].zip(card_str.split('.')).map do |(strain,str)|
+      str.chars.map { |c| Bridge::Card.for suits: [strain], ranks: [Bridge::Rank[c]] }
+    end.flatten
+  end
+
   let(:history) { [] }
   let(:bid)     { subject.bid(hand, history) }
 
@@ -13,12 +20,8 @@ RSpec.describe SAYC_2_1 do
 
   describe "openings" do
     context "with a balanced 25-27 hand" do
-      let(:cards) do # All Aces, 3 kings, 6 low
-        Bridge::Card.for(ranks: [Bridge::Rank::Ace]) +
-          Bridge::Card.for(suits: Bridge::Strain.suits - [Bridge::Strain::Club], ranks: [Bridge::Rank::King]) +
-          Bridge::Card.for(suits: [Bridge::Strain::Club], ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Heart], ranks: Bridge::Rank.spot).sample(2)
+      let(:card_str) do
+        "AK2.AK2.AK2.AT32"
       end
 
       it "opens 3 no trump" do
@@ -27,14 +30,8 @@ RSpec.describe SAYC_2_1 do
     end
 
     context "with a balanced 20-21 hand" do
-      let(:cards) do # All Aces, 1 king
-        Bridge::Card.for(ranks: [Bridge::Rank::Ace]) +
-          Bridge::Card.for(suits: [Bridge::Strain::Spade],   ranks: [Bridge::Rank::King, Bridge::Rank::Jack]) +
-
-          Bridge::Card.for(suits: [Bridge::Strain::Club],    ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Heart],   ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Spade],   ranks: Bridge::Rank.spot).sample(1)
+      let(:card_str) do
+        "AK2.A32.AK2.KT32"
       end
 
       it "opens 2 no trump" do
@@ -43,35 +40,28 @@ RSpec.describe SAYC_2_1 do
     end
 
     context "with a balanced 15-17 hand" do
-      let(:cards) do # All Aces
-        Bridge::Card.for(ranks: [Bridge::Rank::Ace]) +
-          Bridge::Card.for(suits: [Bridge::Strain::Club],    ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Heart],   ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Spade],   ranks: Bridge::Rank.spot).sample(3)
+      let(:card_str) do
+        "A32.A32.A32.AT32"
       end
 
-      it "opens 2 no trump" do
+      it "opens 1 no trump" do
         expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::NoTrump)
       end
     end
 
     context "with a 22+ hcp hand" do
-      let(:cards) do # All Aces
-        Bridge::Card.for(ranks: [Bridge::Rank::Ace, Bridge::Rank::King, Bridge::Rank::Queen, Bridge::Rank::Jack]).sample(13)
+      let(:card_str) do
+        "AKQJ.AKQ.AKQ.AKQ"
       end
 
-      it "opens 2 no trump" do
+      it "opens 2 Club" do
         expect(bid).to eq Bridge::Bid.new(2, Bridge::Strain::Club)
       end
     end
 
     context "with a 13-21 and a 5 card major" do
-      let(:cards) do # All Aces
-        Bridge::Card.for(suits: [Bridge::Strain::Spade], ranks: [Bridge::Rank::Ace, Bridge::Rank::Jack]) +
-          Bridge::Card.for(suits: Bridge::Strain.suits - [Bridge::Strain::Spade], ranks: [Bridge::Rank::Ace]).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Spade], ranks: Bridge::Rank.spot).sample(3) +
-          Bridge::Card.for(suits: Bridge::Strain.minors, ranks: Bridge::Rank.spot).sample(6)
+      let(:card_str) do
+        "AKQJT.432.432.A3"
       end
 
       it "opens 1 of the major" do
@@ -80,11 +70,8 @@ RSpec.describe SAYC_2_1 do
     end
 
     context "with a 13-21 and no 5 card major" do
-      let(:cards) do # All Aces
-        Bridge::Card.for(suits: [Bridge::Strain::Club], ranks: Bridge::Rank.honors - [Bridge::Rank::Ten]) +
-          Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: [Bridge::Rank::King]) +
-          Bridge::Card.for(suits: [Bridge::Strain::Spade], ranks: Bridge::Rank.spot).sample(4) +
-          Bridge::Card.for(suits: [Bridge::Strain::Heart], ranks: Bridge::Rank.spot).sample(4)
+      let(:card_str) do
+        "AKQ.432.432.AJ32"
       end
 
       it "opens 1 of the minor" do
@@ -93,12 +80,8 @@ RSpec.describe SAYC_2_1 do
     end
 
     context "with a 7-12 and a 6 card strong suit" do
-      let(:cards) do # All Aces
-        Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: Bridge::Rank.honors - [Bridge::Rank::King]) +
-          Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Club], ranks: Bridge::Rank.spot).sample(3) +
-          Bridge::Card.for(suits: [Bridge::Strain::Spade], ranks: Bridge::Rank.spot).sample(3) +
-          Bridge::Card.for(suits: [Bridge::Strain::Heart], ranks: Bridge::Rank.spot).sample(1)
+      let(:card_str) do
+        "432.432.AKQJT9.4"
       end
 
       it "opens 2 of the suit" do
@@ -106,12 +89,8 @@ RSpec.describe SAYC_2_1 do
       end
 
       context "when the suit is clubs" do
-        let(:cards) do # All Aces
-          Bridge::Card.for(suits: [Bridge::Strain::Club], ranks: Bridge::Rank.honors - [Bridge::Rank::King]) +
-            Bridge::Card.for(suits: [Bridge::Strain::Club], ranks: Bridge::Rank.spot).sample(2) +
-            Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: Bridge::Rank.spot).sample(3) +
-            Bridge::Card.for(suits: [Bridge::Strain::Spade], ranks: Bridge::Rank.spot).sample(3) +
-            Bridge::Card.for(suits: [Bridge::Strain::Heart], ranks: Bridge::Rank.spot).sample(1)
+        let(:card_str) do
+          "432.432.4.AKQJT9"
         end
 
         it "passes" do
@@ -121,12 +100,8 @@ RSpec.describe SAYC_2_1 do
     end
 
     context "with a 7-12 and a 7 card strong suit" do
-      let(:cards) do # All Aces
-        Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: Bridge::Rank.honors - [Bridge::Rank::King]) +
-          Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: Bridge::Rank.spot).sample(3) +
-          Bridge::Card.for(suits: [Bridge::Strain::Club], ranks: Bridge::Rank.spot).sample(3) +
-          Bridge::Card.for(suits: [Bridge::Strain::Spade], ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Heart], ranks: Bridge::Rank.spot).sample(1)
+      let(:card_str) do
+        "432.43.AKJT987.4"
       end
 
       it "opens 3 of the suit" do
@@ -135,12 +110,8 @@ RSpec.describe SAYC_2_1 do
     end
 
     context "with a 7-12 and a 8 card strong suit" do
-      let(:cards) do # All Aces
-        Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: Bridge::Rank.honors - [Bridge::Rank::King]) +
-          Bridge::Card.for(suits: [Bridge::Strain::Diamond], ranks: Bridge::Rank.spot).sample(4) +
-          Bridge::Card.for(suits: [Bridge::Strain::Club], ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Spade], ranks: Bridge::Rank.spot).sample(2) +
-          Bridge::Card.for(suits: [Bridge::Strain::Heart], ranks: Bridge::Rank.spot).sample(1)
+      let(:card_str) do
+        "432.4.AQJT9876.4"
       end
 
       it "opens 3 of the suit" do

@@ -23,6 +23,10 @@ module Bidding
           fail ArgumentError, "Unkown argument to a seat filter"
         end
       end
+
+      def matches? _hand, history
+        range.include? (history.length % 4) + 1
+      end
     end
 
     class PointFilter < Filter

@@ -32,7 +32,7 @@ module Bidding
 
     def build
       convention.filter_sets << filter_set
-      instance_eval &block
+      instance_exec &block
       convention
     end
 
@@ -85,9 +85,13 @@ module Bidding
     end
 
     def seat number, &block
-      builder = ConventionBuilder.new key, options.merge(parent: convention), &block
-      builder.filter_set << Filter::SeatFilter.new(number)
-      builder.build
+      if block
+        builder = ConventionBuilder.new key, options.merge(parent: convention), &block
+        builder.filter_set << Filter::SeatFilter.new(number)
+        builder.build
+      else
+        filter_set << Filter::SeatFilter.new(number)
+      end
     end
 
     def only_if &block
