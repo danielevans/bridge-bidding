@@ -118,5 +118,25 @@ RSpec.describe SAYC_2_1 do
         expect(bid).to eq Bridge::Bid.new(4, Bridge::Strain::Diamond)
       end
     end
+
+    context "with a 7-12 and a 9 card strong minor" do
+      let(:card_str) do
+        "43.4.AQJT98765.4"
+      end
+
+      it "opens 4 of the minor" do
+        expect(bid).to eq Bridge::Bid.new(5, Bridge::Strain::Diamond)
+      end
+    end
+
+    context "with a 7-12 and a 9 card strong major" do
+      let(:card_str) do
+        "43.AQJT98765.4.4"
+      end
+
+      it "opens 4 of the major" do
+        expect(bid).to eq Bridge::Bid.new(4, Bridge::Strain::Heart)
+      end
+    end
   end
 end

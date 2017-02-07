@@ -110,7 +110,14 @@ SAYC_2_1.define do
                    hand.length(suit) >= 6 && (suit != Bridge::Strain::Club || hand.length(suit) >= 7)
                  end.sort_by { |suit| hand.length(suit) }.first
                end
-      Bridge::Bid.new (hand.length(strain) - 4), strain
+
+      level = (hand.length(strain) - 4)
+      level = if Bridge::Strain.majors.include? strain
+                [level,4]
+              else
+                [level,5]
+              end.min
+      Bridge::Bid.new level, strain
     end
   end
 end
