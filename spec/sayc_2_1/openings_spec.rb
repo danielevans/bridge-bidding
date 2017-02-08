@@ -11,7 +11,8 @@ RSpec.describe SAYC_2_1 do
     end.flatten
   end
 
-  let(:history) { [] }
+  let(:seat)    { 1 }
+  let(:history) { [Bridge::Bid.new]*(seat - 1)  }
   let(:bid)     { subject.bid(hand, history) }
 
   let(:hand) do
@@ -27,6 +28,20 @@ RSpec.describe SAYC_2_1 do
       it "opens 3 no trump" do
         expect(bid).to eq Bridge::Bid.new(3, Bridge::Strain::NoTrump)
       end
+
+      context "in third seat" do
+        let(:seat) { 3 }
+        it "opens 3 no trump" do
+          expect(bid).to eq Bridge::Bid.new(3, Bridge::Strain::NoTrump)
+        end
+      end
+
+      context "in fourth seat" do
+        let(:seat) { 4 }
+        it "opens 3 no trump" do
+          expect(bid).to eq Bridge::Bid.new(3, Bridge::Strain::NoTrump)
+        end
+      end
     end
 
     context "with a balanced 20-21 hand" do
@@ -36,6 +51,21 @@ RSpec.describe SAYC_2_1 do
 
       it "opens 2 no trump" do
         expect(bid).to eq Bridge::Bid.new(2, Bridge::Strain::NoTrump)
+      end
+
+
+      context "in third seat" do
+        let(:seat) { 4 }
+        it "opens 2 no trump" do
+          expect(bid).to eq Bridge::Bid.new(2, Bridge::Strain::NoTrump)
+        end
+      end
+
+      context "in fourth seat" do
+        let(:seat) { 4 }
+        it "opens 2 no trump" do
+          expect(bid).to eq Bridge::Bid.new(2, Bridge::Strain::NoTrump)
+        end
       end
     end
 
@@ -47,6 +77,20 @@ RSpec.describe SAYC_2_1 do
       it "opens 1 no trump" do
         expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::NoTrump)
       end
+
+      context "in third seat" do
+        let(:seat) { 3 }
+        it "opens 3 no trump" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::NoTrump)
+        end
+      end
+
+      context "in fourth seat" do
+        let(:seat) { 4 }
+        it "opens 1 no trump" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::NoTrump)
+        end
+      end
     end
 
     context "with a 22+ hcp hand" do
@@ -56,6 +100,20 @@ RSpec.describe SAYC_2_1 do
 
       it "opens 2 Club" do
         expect(bid).to eq Bridge::Bid.new(2, Bridge::Strain::Club)
+      end
+
+      context "in third seat" do
+        let(:seat) { 3 }
+        it "opens 1 club" do
+          expect(bid).to eq Bridge::Bid.new(2, Bridge::Strain::Club)
+        end
+      end
+
+      context "in fourth seat" do
+        let(:seat) { 4 }
+        it "opens 2 club" do
+          expect(bid).to eq Bridge::Bid.new(2, Bridge::Strain::Club)
+        end
       end
     end
 
@@ -67,7 +125,64 @@ RSpec.describe SAYC_2_1 do
       it "opens 1 of the major" do
         expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Spade)
       end
+
+      context "in third seat" do
+        let(:seat) { 3 }
+        it "opens 1 of the major" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Spade)
+        end
+      end
+
+      context "in fourth seat" do
+        let(:seat) { 4 }
+        it "opens 1 of the major" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Spade)
+        end
+
+        context "and failing the rule of 15" do
+          let(:card_str) do
+            ".AKQT9.432.A5432"
+          end
+          it "passes" do
+            expect(bid).to eq Bridge::Bid.new
+          end
+        end
+      end
     end
+
+    context "with a 11-12 and a 5 card major" do
+      let(:card_str) do
+        "AQJT9.432.432.A3"
+      end
+
+      it "passes" do
+        expect(bid).to eq Bridge::Bid.new
+      end
+
+      context "in third seat" do
+        let(:seat) { 3 }
+        it "opens 1 of the major" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Spade)
+        end
+      end
+
+      context "in fourth seat" do
+        let(:seat) { 4 }
+        it "opens 1 of the major" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Spade)
+        end
+
+        context "and failing the rule of 15" do
+          let(:card_str) do
+            ".AQT98.432.A5432"
+          end
+          it "passes" do
+            expect(bid).to eq Bridge::Bid.new
+          end
+        end
+      end
+    end
+
 
     context "with a 13-21 and no 5 card major" do
       let(:card_str) do
@@ -76,6 +191,63 @@ RSpec.describe SAYC_2_1 do
 
       it "opens 1 of the minor" do
         expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Club)
+      end
+
+      context "in third seat" do
+        let(:seat) { 3 }
+        it "opens 1 of the minor" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Club)
+        end
+      end
+
+      context "in fourth seat" do
+        let(:seat) { 4 }
+        it "opens 1 of the minor" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Club)
+        end
+
+        context "and failing the rule of 15" do
+          let(:card_str) do
+            ".AK32.5432.A5432"
+          end
+          it "passes" do
+            expect(bid).to eq Bridge::Bid.new
+          end
+        end
+      end
+    end
+
+
+    context "with a 11-12 and no 5 card major" do
+      let(:card_str) do
+        "AQ98.432.43.AJ32"
+      end
+
+      it "passes" do
+        expect(bid).to eq Bridge::Bid.new
+      end
+
+      context "in third seat" do
+        let(:seat) { 3 }
+        it "opens 1 of the minor" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Club)
+        end
+      end
+
+      context "in fourth seat" do
+        let(:seat) { 4 }
+        it "opens 1 of the minor" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Club)
+        end
+
+        context "and failing the rule of 15" do
+          let(:card_str) do
+            ".AK32.5432.A5432"
+          end
+          it "passes" do
+            expect(bid).to eq Bridge::Bid.new
+          end
+        end
       end
     end
 
@@ -95,6 +267,32 @@ RSpec.describe SAYC_2_1 do
 
         it "passes" do
           expect(bid).to eq Bridge::Bid.new
+        end
+      end
+
+      context "in third seat" do
+        let(:seat) { 3 }
+        it "opens 2 of the minor" do
+          expect(bid).to eq Bridge::Bid.new(1, Bridge::Strain::Diamond)
+        end
+      end
+
+      context "in fourth seat" do
+        let(:seat) { 4 }
+
+        context "when the suit is spades but the rule of 15 is not satisfied" do
+          let(:card_str) do
+            "KQT987.432.432.4"
+          end
+          it "passes" do
+            expect(bid).to eq Bridge::Bid.new
+          end
+        end
+
+        context "when the suit is not spades" do
+          it "passes" do
+            expect(bid).to eq Bridge::Bid.new
+          end
         end
       end
     end
@@ -136,6 +334,16 @@ RSpec.describe SAYC_2_1 do
 
       it "opens 4 of the major" do
         expect(bid).to eq Bridge::Bid.new(4, Bridge::Strain::Heart)
+      end
+    end
+
+    context "with 0 points" do
+      let(:card_str) do
+        "5432.432.432.432"
+      end
+
+      it "passes" do
+        expect(bid).to eq Bridge::Bid.new
       end
     end
   end

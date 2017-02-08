@@ -39,7 +39,7 @@ SAYC_2_1.define do
 
     seat 4 do
       only_if do |hand, _history| # rule of 15
-        hand.length(Bridge::Strain::Spades) + hand.high_card_points >= 15
+        hand.length(Bridge::Strain::Spade) + hand.high_card_points >= 15
       end
     end
 
@@ -63,7 +63,7 @@ SAYC_2_1.define do
 
     seat 4 do
       only_if do |hand, _history| # rule of 15
-        hand.length(Bridge::Strain::Spades) + hand.high_card_points >= 15
+        hand.length(Bridge::Strain::Spade) + hand.high_card_points >= 15
       end
     end
 
@@ -88,15 +88,15 @@ SAYC_2_1.define do
     opening true
     length_points 7..12
 
-    only_if do |hand, _history|
-      (Bridge::Strain.suits).any? do |suit|
-        hand.length(suit) >= 6 && hand.strong?(suit) && (suit != Bridge::Strain::Club || hand.length(suit) >= 7)
+    seat 4 do
+      only_if do |hand, _history| # rule of 15
+        (hand.length(Bridge::Strain::Spade) + hand.high_card_points >= 15) && hand.length(Bridge::Strain::Spade) >= 6
       end
     end
 
-    seat 4 do
-      only_if do |hand, _history| # rule of 15
-        (hand.length(Bridge::Strain::Spades) + hand.high_card_points >= 15) && hand.length(Bridge::Strain::Spades) >= 6
+    only_if do |hand, _history|
+      (Bridge::Strain.suits).any? do |suit|
+        hand.length(suit) >= 6 && hand.strong?(suit) && (suit != Bridge::Strain::Club || hand.length(suit) >= 7)
       end
     end
 

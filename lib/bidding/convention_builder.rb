@@ -7,15 +7,11 @@ module Bidding
     attr_accessor :key
     attr_accessor :options
     attr_accessor :block
+    attr_accessor :convention
+    attr_accessor :filter_set
 
     def initialize key, options={}, &block
       parent       = options.delete(:parent)
-      @convention  = parent.convention.dup if options[:parent]
-
-      if @convention
-        @filter_set = parent.filter_set.dup
-        @convention.filter_sets << @filter_set
-      end
 
       self.key     = key
       self.options = options
@@ -86,7 +82,9 @@ module Bidding
 
     def seat number, &block
       if block
-        builder = ConventionBuilder.new key, options.merge(parent: convention), &block
+        builder = ConventionBuilder.new key, options, &block
+        builder.convention = convention
+        builder.filter_set = filter_set.dup
         builder.filter_set << Filter::SeatFilter.new(number)
         builder.build
       else

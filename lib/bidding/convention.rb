@@ -15,7 +15,7 @@ module Bidding
     end
 
     def matches? hand, history
-      Array(self.filter_sets).all? do |filter_set|
+      Array(self.filter_sets).any? do |filter_set|
         filter_set.matches? hand, history
       end
     end

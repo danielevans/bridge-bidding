@@ -7,7 +7,9 @@ module Bidding
     end
 
     def dup
-      map(&:dup)
+      each_with_object(FilterSet.new) do |element,other|
+        other << element
+      end
     end
   end
 end
